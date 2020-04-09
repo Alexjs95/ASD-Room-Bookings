@@ -10,7 +10,7 @@ public class ConnectionUtil {
 
     public static Connection connectDB() {
         try {
-            Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/roombookingsystem", "test", "test");
+            Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/roombookingsystem?&serverTimezone=BST", "test", "test");
             return conn;
         } catch (Exception e) {
             System.out.println("cannot connect to DB");
