@@ -1,44 +1,50 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
 
-<?import javafx.scene.control.cell.PropertyValueFactory?>
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="frames.BookingController"
-            prefHeight="400.0" prefWidth="600.0">
+<AnchorPane prefHeight="672.0" prefWidth="717.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="frames.BookingController">
 
-    <TableView fx:id="tableView" prefHeight="300" prefWidth="500">
+    <TableView fx:id="tableView" layoutX="43.0" layoutY="58.0" prefHeight="300" prefWidth="631.0">
         <columns>
-            <TableColumn prefWidth="120" text="Date" fx:id="dateCol">
-            </TableColumn>
-
-            <TableColumn prefWidth="80" text="Room name" fx:id="roomnameCol">
-
-            </TableColumn>
-            <TableColumn prefWidth="80" text="Room size" fx:id="roomsizeCol">
-
-            </TableColumn>
-            <TableColumn prefWidth="80" text="Room type" fx:id="roomtypeCol">
-
-            </TableColumn>
-            <TableColumn prefWidth="50" text="Term" fx:id="termCol">
-
-            </TableColumn>
-            <TableColumn prefWidth="40" text="AM" fx:id="amCol">
-
-            </TableColumn>
-            <TableColumn prefWidth="40" text="PM" fx:id="pmCol">
-
-            </TableColumn>
-
+            <TableColumn fx:id="dateCol" prefWidth="120" text="Date" />
+            <TableColumn fx:id="roomnameCol" prefWidth="80" text="Room name" />
+            <TableColumn fx:id="roomsizeCol" prefWidth="80" text="Room size" />
+            <TableColumn fx:id="roomtypeCol" prefWidth="80" text="Room type" />
+            <TableColumn fx:id="termCol" prefWidth="50" text="Term" />
+            <TableColumn fx:id="amCol" prefWidth="40" text="AM" />
+            <TableColumn fx:id="pmCol" prefWidth="40" text="PM" />
         </columns>
-
     </TableView>
+
+    <Label layoutX="22.0" layoutY="367.0" text="To make a booking select a row from the table">Booking</Label>
+   <Label layoutX="8.0" layoutY="6.0" text="Booking">
+      <font>
+         <Font size="18.0" />
+      </font>
+   </Label>
+   <Label fx:id="lblDate" layoutX="19.0" layoutY="390.0" prefHeight="17.0" prefWidth="238.0" text="Selected date:" />
+   <Label fx:id="lblRoom" layoutX="19.0" layoutY="407.0" prefHeight="17.0" prefWidth="206.0" text="Selected room: " />
+   <Label layoutX="24.0" layoutY="442.0" prefHeight="17.0" prefWidth="89.0" text="Booking for:" />
+   <Label layoutX="22.0" layoutY="477.0" prefHeight="17.0" prefWidth="71.0" text="Contact:" />
+   <Label layoutX="22.0" layoutY="510.0" text="Select Period" />
+   <Label layoutX="22.0" layoutY="545.0" text="Additional Notes:" />
+   <CheckBox fx:id="chkAM" layoutX="105.0" layoutY="510.0" mnemonicParsing="false" text="AM" />
+   <CheckBox fx:id="chkPM" layoutX="167.0" layoutY="510.0" mnemonicParsing="false" text="PM" />
+   <TextField fx:id="txtNotes" layoutX="126.0" layoutY="541.0" prefHeight="25.0" prefWidth="206.0" />
+   <TextField fx:id="txtName" layoutX="112.0" layoutY="438.0" />
+   <TextField fx:id="txtContact" layoutX="102.0" layoutY="473.0" />
+   <Button fx:id="btnBook" layoutX="48.0" layoutY="592.0" mnemonicParsing="false" text="Make Booking" />
+   <Label layoutX="422.0" layoutY="358.0" text="Filter table" />
+   <DatePicker id="txtDateFilter" layoutX="478.0" layoutY="378.0" />
+   <Label fx:id="lblUser" layoutX="21.0" layoutY="33.0" prefHeight="17.0" prefWidth="273.0" text="Logged in as:" />
 
 
 </AnchorPane>

@@ -5,10 +5,12 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import utils.ConnectionUtil;
 
@@ -24,7 +26,6 @@ public class LoginController implements Initializable  {
     @FXML private PasswordField txtPassword;
 
     Stage dialog = new Stage();
-    Scene scene;
 
     Connection conn;
     PreparedStatement ps = null;
@@ -33,7 +34,6 @@ public class LoginController implements Initializable  {
     public LoginController() {
         conn = ConnectionUtil.connectDB();
     }
-
 
     @FXML
     private void handleBtnLogin(ActionEvent event) {
@@ -55,6 +55,8 @@ public class LoginController implements Initializable  {
                 Employee user = new Employee();       // Create a new employee
                 user.setUsername(rs.getString("USERNAME"));       // Assign values
                 user.setRole(rs.getString("ROLE"));
+                user.setForename(rs.getString("FORENAME"));
+                user.setSurname(rs.getString("SURNAME"));
 
                 Node source = (Node) event.getSource();
                 dialog = (Stage) source.getScene().getWindow();
@@ -62,13 +64,20 @@ public class LoginController implements Initializable  {
 
                 if (user.getRole() == "manager") {
                     System.out.println("load manager page");
-                    scene = new Scene(FXMLLoader.load(getClass().getResource("Manager.fxml")));
+
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("Manager.fxml"));
+                    dialog.setScene(new Scene(loader.load()));
+                    BookingController bc = loader.getController();
+                    bc.setUser(user);
                 } else {
                     System.out.println("load booking form");
-                    scene = new Scene(FXMLLoader.load(getClass().getResource("Booking.fxml")));
+
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("Booking.fxml"));
+                    dialog.setScene(new Scene(loader.load()));
+                    BookingController bc = loader.getController();
+                    bc.setUser(user);       // Passes ueer to booking controller.
                 }
 
-                dialog.setScene(scene);
                 dialog.show();
             }
         }catch (Exception x) {
@@ -84,10 +93,8 @@ public class LoginController implements Initializable  {
         alert.showAndWait();
     }
 
-
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-
 
     }
 }

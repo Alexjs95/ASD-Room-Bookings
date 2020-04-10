@@ -1,13 +1,16 @@
 package frames;
 
+import dbtools.Employee;
 import dbtools.Rows;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
@@ -31,7 +34,19 @@ public class BookingController implements Initializable {
     @FXML public TableColumn amCol = new TableColumn();
     @FXML public TableColumn pmCol = new TableColumn();
 
+    @FXML Label lblUser;
+    @FXML Label lblDate;
+    @FXML Label lblRoom;
+    @FXML TextField txtName;
+    @FXML TextField txtNotes;
+    @FXML TextField txtContact;
+    @FXML CheckBox chkAM;
+    @FXML CheckBox chkPM;
+    @FXML Button btnBook;
+
     private ObservableList<Rows> data;
+
+    Employee currUser;
 
     Stage dialog = new Stage();
     Scene scene;
@@ -46,8 +61,13 @@ public class BookingController implements Initializable {
         conn = ConnectionUtil.connectDB();
     }
 
+
+
     @Override
+    @FXML
     public void initialize(URL location, ResourceBundle resources) {
+
+
         // Links the columns to the table in the fxml file.
         dateCol.setCellValueFactory(new PropertyValueFactory<Rows, String>("date"));
         roomnameCol.setCellValueFactory(new PropertyValueFactory<Rows, String>("roomname"));
@@ -60,31 +80,41 @@ public class BookingController implements Initializable {
         data = getInitialData();
         tableView.setItems(data);
 
+        //lblUser.setText("Logged in as: " + currUser.getUsername());
+        //System.out.println(currUser.getUsername());
         // Row click event
         tableView.setOnMouseClicked((MouseEvent event) -> {
             if (tableView.getSelectionModel().getSelectedItem() != null) {
+                resetForm();
                 Rows selectedItem = tableView.getSelectionModel().getSelectedItem();
-                System.out.println(selectedItem.getRoomname());
+                lblDate.setText(selectedItem.getDate());
+                lblRoom.setText(selectedItem.getRoomname());
+
+                //disable check boxes if the value is false in the row.
+                if (!selectedItem.isAm()) {
+                    chkAM.setDisable(true);
+                }
+                if (!selectedItem.isPm()) {
+                    chkPM.setDisable(true);
+                }
+
             }
         });
-
-
-        // Loops through the observable list to ensure everything
-        for (int i = 0; i < data.size(); i++) {
-            Rows temp = new Rows();
-            temp = data.get(i);
-            System.out.println(temp.getDate());
-            System.out.println(temp.getRoomname());
-            System.out.println(temp.getType());
-            System.out.println(temp.getSize());
-            System.out.println(temp.isAm());
-            System.out.println(temp.isPm());
-            System.out.println(temp.isTerm());
-            System.out.println("NEXT");
-        }
-        System.out.println(data);
     }
 
+    void setUser(Employee employee) {
+        lblUser.setText(employee.getUsername());
+    }
+
+    void resetForm() {
+        lblRoom.setText("");
+        lblDate.setText("");
+        txtContact.setText("");
+        txtName.setText("");
+        txtNotes.setText("");
+        chkAM.setDisable(false);
+        chkPM.setDisable(false);
+    }
 
     public ObservableList getInitialData() {
         List list = new ArrayList();
