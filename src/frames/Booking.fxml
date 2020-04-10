@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="frames.BookingController"
+            prefHeight="400.0" prefWidth="600.0">
+
+    <TableView fx:id="tableView" prefHeight="300" prefWidth="500">
+        <columns>
+            <TableColumn prefWidth="120" text="Date" fx:id="dateCol">
+            </TableColumn>
+
+            <TableColumn prefWidth="80" text="Room name" fx:id="roomnameCol">
+
+            </TableColumn>
+            <TableColumn prefWidth="80" text="Room size" fx:id="roomsizeCol">
+
+            </TableColumn>
+            <TableColumn prefWidth="80" text="Room type" fx:id="roomtypeCol">
+
+            </TableColumn>
+            <TableColumn prefWidth="50" text="Term" fx:id="termCol">
+
+            </TableColumn>
+            <TableColumn prefWidth="40" text="AM" fx:id="amCol">
+
+            </TableColumn>
+            <TableColumn prefWidth="40" text="PM" fx:id="pmCol">
+
+            </TableColumn>
+
+        </columns>
+
+    </TableView>
+
+
+</AnchorPane>

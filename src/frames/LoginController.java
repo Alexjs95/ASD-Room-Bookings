@@ -20,11 +20,8 @@ import java.sql.ResultSet;
 import java.util.ResourceBundle;
 
 public class LoginController implements Initializable  {
-    @FXML
-    private TextField txtUsername;
-
-    @FXML
-    private PasswordField txtPassword;
+    @FXML private TextField txtUsername;
+    @FXML private PasswordField txtPassword;
 
     Stage dialog = new Stage();
     Scene scene;
@@ -36,6 +33,8 @@ public class LoginController implements Initializable  {
     public LoginController() {
         conn = ConnectionUtil.connectDB();
     }
+
+
     @FXML
     private void handleBtnLogin(ActionEvent event) {
         String username = txtUsername.getText();
@@ -53,15 +52,15 @@ public class LoginController implements Initializable  {
                 popup("Unsuccessful Login attempt. Please try again.", "Unsuccessful");
                 // Failed Login attempt
             } else {
-                Employee e1 = new Employee();       // Create a new employee
-                e1.setUsername(rs.getString("USERNAME"));       // Assign values
-                e1.setRole(rs.getString("ROLE"));
+                Employee user = new Employee();       // Create a new employee
+                user.setUsername(rs.getString("USERNAME"));       // Assign values
+                user.setRole(rs.getString("ROLE"));
 
                 Node source = (Node) event.getSource();
                 dialog = (Stage) source.getScene().getWindow();
                 dialog.close();
 
-                if (e1.getRole() == "manager") {
+                if (user.getRole() == "manager") {
                     System.out.println("load manager page");
                     scene = new Scene(FXMLLoader.load(getClass().getResource("Manager.fxml")));
                 } else {
@@ -88,6 +87,7 @@ public class LoginController implements Initializable  {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+
 
     }
 }

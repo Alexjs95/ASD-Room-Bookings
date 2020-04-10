@@ -33,15 +33,30 @@ public class CreateTables {
         emp1.setSurname("Scotson");
         emp1.setUsername("test");
 
+        Room room1 = new Room();
+        room1.setRoomname("SJG/05");
+        room1.setSize(20);
+        room1.setRoomtype("computer");
+
 
         // Inserting employee into DB
         String query1 =  "INSERT into roombookingsystem.employees (forename, surname, username, role) values (?,?,?,?)";
+        String query2 = "INSERT into roombookingsystem.rooms (name, size, type) values (?,?,?)";
+
         try {
             PreparedStatement ps = conn.prepareStatement(query1);
             ps.setString(1, emp1.getForename());
             ps.setString(2, emp1.getSurname());
             ps.setString(3, emp1.getUsername());
             ps.setString(4, emp1.getRole());
+
+            ps.execute();
+            ps.clearParameters();
+
+            ps = conn.prepareStatement(query2);
+            ps.setString(1, room1.getRoomname());
+            ps.setInt(2, room1.getSize());
+            ps.setString(3, room1.getRoomtype());
 
             ps.execute();
             ps.close();
@@ -56,10 +71,10 @@ public class CreateTables {
         LocalDate date = LocalDate.now();       // Get todays today
         LocalDate endDate = date.plusMonths(3);      // Add 3 months to todays date.
 
-        String query2 = "INSERT INTO roombookingsystem.availability (DATE, TERMTIME, AM, PM)"
+        String query3 = "INSERT INTO roombookingsystem.availability (DATE, TERMTIME, AM, PM)"
                 + " VALUES " + "(?, ?, ?, ?)";
         try {
-            PreparedStatement ps = conn.prepareStatement(query2);
+            PreparedStatement ps = conn.prepareStatement(query3);
             //Loop through each day between now and the end day, incrementing 1 day at a time.
             for (LocalDate currdate = date; currdate.isBefore(endDate); currdate=currdate.plusDays(1)) {
                 String day = currdate.getDayOfWeek().toString().toLowerCase();
