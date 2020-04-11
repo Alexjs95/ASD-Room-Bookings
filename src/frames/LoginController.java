@@ -57,6 +57,7 @@ public class LoginController implements Initializable  {
                 user.setRole(rs.getString("ROLE"));
                 user.setForename(rs.getString("FORENAME"));
                 user.setSurname(rs.getString("SURNAME"));
+                int id = rs.getInt("Employee_ID");
 
                 Node source = (Node) event.getSource();
                 dialog = (Stage) source.getScene().getWindow();
@@ -67,20 +68,21 @@ public class LoginController implements Initializable  {
 
                     FXMLLoader loader = new FXMLLoader(getClass().getResource("Manager.fxml"));
                     dialog.setScene(new Scene(loader.load()));
-                    BookingController bc = loader.getController();
-                    bc.setUser(user);
+                    //BookingController bc = loader.getController();
+                    //bc.setUser(user, id);
                 } else {
                     System.out.println("load booking form");
 
                     FXMLLoader loader = new FXMLLoader(getClass().getResource("Booking.fxml"));
                     dialog.setScene(new Scene(loader.load()));
                     BookingController bc = loader.getController();
-                    bc.setUser(user);       // Passes ueer to booking controller.
+                    bc.setUser(user, id);       // Passes user to booking controller.
                 }
 
                 dialog.show();
             }
         }catch (Exception x) {
+            x.printStackTrace();
             System.out.println(x);
         }
     }

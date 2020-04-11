@@ -30,8 +30,8 @@
          <Font size="18.0" />
       </font>
    </Label>
-   <Label fx:id="lblDate" layoutX="19.0" layoutY="390.0" prefHeight="17.0" prefWidth="238.0" text="Selected date:" />
-   <Label fx:id="lblRoom" layoutX="19.0" layoutY="407.0" prefHeight="17.0" prefWidth="206.0" text="Selected room: " />
+   <Label layoutX="19.0" layoutY="390.0" prefHeight="17.0" prefWidth="93.0" text="Selected date:" />
+   <Label layoutX="19.0" layoutY="407.0" prefHeight="17.0" prefWidth="89.0" text="Selected room: " />
    <Label layoutX="24.0" layoutY="442.0" prefHeight="17.0" prefWidth="89.0" text="Booking for:" />
    <Label layoutX="22.0" layoutY="477.0" prefHeight="17.0" prefWidth="71.0" text="Contact:" />
    <Label layoutX="22.0" layoutY="510.0" text="Select Period" />
@@ -45,6 +45,9 @@
    <Label layoutX="422.0" layoutY="358.0" text="Filter table" />
    <DatePicker id="txtDateFilter" layoutX="478.0" layoutY="378.0" />
    <Label fx:id="lblUser" layoutX="21.0" layoutY="33.0" prefHeight="17.0" prefWidth="273.0" text="Logged in as:" />
+   <Label fx:id="lblDate" layoutX="112.0" layoutY="390.0" />
+   <Label fx:id="lblRoom" layoutX="112.0" layoutY="407.0" />
+   <Label fx:id="lblID" layoutX="394.0" layoutY="33.0" opacity="0.0" />
 
 
 </AnchorPane>

@@ -1,9 +1,11 @@
 package frames;
 
+import com.mysql.cj.result.Row;
 import dbtools.Employee;
 import dbtools.Rows;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -16,6 +18,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import utils.ConnectionUtil;
 
+import javax.xml.transform.Result;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -37,6 +40,7 @@ public class BookingController implements Initializable {
     @FXML Label lblUser;
     @FXML Label lblDate;
     @FXML Label lblRoom;
+    @FXML Label lblID;
     @FXML TextField txtName;
     @FXML TextField txtNotes;
     @FXML TextField txtContact;
@@ -47,7 +51,7 @@ public class BookingController implements Initializable {
     private ObservableList<Rows> data;
 
     Employee currUser;
-
+    int empID;
     Stage dialog = new Stage();
     Scene scene;
 
@@ -66,8 +70,6 @@ public class BookingController implements Initializable {
     @Override
     @FXML
     public void initialize(URL location, ResourceBundle resources) {
-
-
         // Links the columns to the table in the fxml file.
         dateCol.setCellValueFactory(new PropertyValueFactory<Rows, String>("date"));
         roomnameCol.setCellValueFactory(new PropertyValueFactory<Rows, String>("roomname"));
@@ -80,8 +82,6 @@ public class BookingController implements Initializable {
         data = getInitialData();
         tableView.setItems(data);
 
-        //lblUser.setText("Logged in as: " + currUser.getUsername());
-        //System.out.println(currUser.getUsername());
         // Row click event
         tableView.setOnMouseClicked((MouseEvent event) -> {
             if (tableView.getSelectionModel().getSelectedItem() != null) {
@@ -97,13 +97,106 @@ public class BookingController implements Initializable {
                 if (!selectedItem.isPm()) {
                     chkPM.setDisable(true);
                 }
+                if (!selectedItem.isPm() && !selectedItem.isPm()) {     // If both am is pm is false
+                    txtNotes.setDisable(true);      // then no booking can be made for that day
+                    txtName.setDisable(true);
+                    txtContact.setDisable(true);
+                }
 
+            }
+        });
+
+        btnBook.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                String bookingFor = txtName.getText();
+                String contact = txtContact.getText();
+                String room = lblRoom.getText();
+                String notes = txtNotes.getText();
+                String date = lblDate.getText();
+                Boolean am = chkAM.isSelected();
+                Boolean pm = chkPM.isSelected();
+
+                // Ensure all values contain something
+                // ensure at least 1 check box is selected
+                // dont allow both check boxes to be selected
+
+
+
+                String makeBooking = "INSERT into roombookingsystem.bookings (ROOM_ID, AVAILABILITY_ID, EMPLOYEE_ID, BOOKED_FOR, CONTACT, NOTES) VALUES (?,?,?,?,?,?)";
+                String getAvailID = "SELECT * FROM roombookingsystem.availability where DATE = ?";
+                String getRoomID = "SELECT * FROM roombookingsystem.rooms where NAME = ?";
+                String updateAvailabilities = "UPDATE roombookingsystem.availability SET AM = ?, PM = ? WHERE availability_ID = ?";
+
+                try {
+                    PreparedStatement ps = conn.prepareStatement(getAvailID);
+                    ps.setString(1, date);
+                    ResultSet rs = ps.executeQuery();
+
+                    rs.first();
+                    int avail_id = rs.getInt("AVAILABILITY_ID");
+
+                    PreparedStatement ps2 = conn.prepareStatement(getRoomID);
+                    ps2.setString(1, room);
+                    ResultSet rs2 = ps2.executeQuery();
+
+                    rs2.first();
+                    int room_id = rs2.getInt("ROOM_ID");
+
+                    PreparedStatement ps3 = conn.prepareStatement(makeBooking);
+                    ps3.setInt(1, room_id);
+                    ps3.setInt(2, avail_id);
+                    ps3.setInt(3, empID);
+                    ps3.setString(4, bookingFor);
+                    ps3.setString(5, contact);
+                    ps3.setString(6, notes);
+
+                    ps3.execute();
+
+                    if (am) {       // AM selected to be booked
+                        am = false;         // AM no longer available for the update query
+                    }
+                    if (pm) {
+                        System.out.println(pm + " change to");
+                        pm = false;
+                        System.out.println(pm);
+                    }
+
+                    PreparedStatement ps4 = conn.prepareStatement(updateAvailabilities);
+                    ps4.setBoolean(1, am);
+                    ps4.setBoolean(2, pm);
+                    ps4.setInt(3, avail_id);
+
+                    ps4.execute();
+
+                    for(int index = 0; index < data.size(); index++) {
+                        if (data.get(index).getDate() .equals(date) && data.get(index).getRoomname().equals(room)) {
+                            data.get(index).setPm(pm);
+                            data.get(index).setAm(am);
+                        }
+                    }
+                    resetForm();
+
+                } catch (Exception e) {
+                    System.out.println(e);
+                }
+            }
+        });
+
+
+        data.addListener((ListChangeListener<Rows>) change -> {
+            while (change.next()) {
+                tableView.setItems(data);
             }
         });
     }
 
-    void setUser(Employee employee) {
+
+
+
+    void setUser(Employee employee, int id) {
         lblUser.setText(employee.getUsername());
+        empID = id;
     }
 
     void resetForm() {
@@ -114,13 +207,16 @@ public class BookingController implements Initializable {
         txtNotes.setText("");
         chkAM.setDisable(false);
         chkPM.setDisable(false);
+        txtContact.setDisable(false);
+        txtName.setDisable(false);
+        txtNotes.setDisable(false);
     }
 
     public ObservableList getInitialData() {
         List list = new ArrayList();
 
         String queryRooms = "SELECT * FROM roombookingsystem.rooms";
-        String queryAvailable = "SELECT * FROM roombookingsystem.availability";
+        String queryAvailable = "SELECT * FROM roombookingsystem.availability";     // change to only today and after
         String queryBookings = "SELECT * FROM roombookingsystem.bookings";
 
         try {
