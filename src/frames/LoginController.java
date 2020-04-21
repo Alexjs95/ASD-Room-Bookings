@@ -8,6 +8,7 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
@@ -34,6 +35,9 @@ public class LoginController implements Initializable  {
     public LoginController() {
         conn = ConnectionUtil.connectDB();
     }
+
+
+
 
     @FXML
     private void handleBtnLogin(ActionEvent event) {
@@ -63,7 +67,7 @@ public class LoginController implements Initializable  {
                 dialog = (Stage) source.getScene().getWindow();
                 dialog.close();
 
-                if (user.getRole() == "manager") {
+                if (user.getRole().equals("manager")) {
                     System.out.println("load manager page");
 
                     FXMLLoader loader = new FXMLLoader(getClass().getResource("Manager.fxml"));

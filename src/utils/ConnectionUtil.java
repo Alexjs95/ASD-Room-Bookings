@@ -7,6 +7,8 @@ import java.sql.DriverManager;
 // Class to have the retrieve a connection to the DB
 public class ConnectionUtil {
     Connection conn = null;
+    public static String host ="localhost";
+    public static int port=8002;
 
     public static Connection connectDB() {
         try {
