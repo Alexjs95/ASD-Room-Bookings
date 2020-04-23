@@ -24,6 +24,8 @@ import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -110,7 +112,8 @@ public class BookingController extends Thread implements Initializable    {
             ex.printStackTrace();
         }
 
-        getData();
+        TableData tableData = new TableData();
+        data = tableData.getData();
         tableView.setItems(data);
 
         // Row click event
@@ -164,7 +167,6 @@ public class BookingController extends Thread implements Initializable    {
                     System.out.println(bookings.getContact());
                     System.out.println(bookings.getNotes());
                 });
-                System.out.println(bookings);
 
                 tableBookings.setItems(bookings);
             }
@@ -189,6 +191,25 @@ public class BookingController extends Thread implements Initializable    {
             String updateAvailabilities = "UPDATE roombookingsystem.availability SET AM = ?, PM = ? WHERE availability_ID = ?";
 
             try {
+
+                if (am && pm) { // Booking for AM and PM
+                    am = false;
+                    pm = false;
+                    notes = notes + " Booked for AM & PM";
+                } else if (am) {    // Booking just for AM
+                    am = false;     // No longer available.
+                    notes = notes + " Booked for AM";
+                    if (selectedItem.isPm()) {   // Check if PM in is available.
+                        pm = true;  // Change to true as room is available and not being booked.
+                    }
+                } else if (pm) {    // Booking room at PM.
+                    pm = false;     // room becomes unavailable.
+                    notes = notes + " Booked for PM";
+                    if (selectedItem.isAm()) {  // Check whether AM is available.
+                        am = true;      // set am to true so it stays available.
+                    }
+                }
+
                 PreparedStatement ps3 = conn.prepareStatement(makeBooking);
                 ps3.setInt(1, room_id);
                 ps3.setInt(2, avail_id);
@@ -198,22 +219,6 @@ public class BookingController extends Thread implements Initializable    {
                 ps3.setString(6, notes);
 
                 ps3.execute();
-
-                if (am && pm) { // Booking for AM and PM
-                    am = false;
-                    pm = false;
-                } else if (am) {    // Booking just for AM
-                    am = false;     // No longer available.
-                    if (selectedItem.isPm()) {   // Check if PM in is available.
-                        pm = true;  // Change to true as room is available and not being booked.
-                    }
-                } else if (pm) {    // Booking room at PM.
-                    pm = false;     // room becomes unavailable.
-                    if (selectedItem.isAm()) {  // Check whether AM is available.
-                        am = true;      // set am to true so it stays available.
-                    }
-                }
-
 
                 PreparedStatement ps4 = conn.prepareStatement(updateAvailabilities);
                 ps4.setBoolean(1, am);
@@ -291,46 +296,5 @@ public class BookingController extends Thread implements Initializable    {
     }
 
 
-    public ObservableList getData() {
-        List list = new ArrayList();
 
-        String queryRooms = "SELECT * FROM roombookingsystem.rooms";
-        String queryAvailable = "SELECT * FROM roombookingsystem.availability";     // change to only today and after
-        String queryBookings = "SELECT * FROM roombookingsystem.bookings";
-
-        try {
-            ps = conn.prepareStatement(queryRooms);
-            rsRooms = ps.executeQuery();
-            ps.clearParameters();
-            ps = conn.prepareStatement(queryAvailable);
-            rsAvailable = ps.executeQuery();
-            ps.clearParameters();
-            ps = conn.prepareStatement(queryBookings);
-            rsBookings = ps.executeQuery();
-            ps.clearParameters();
-
-            // Loops through all availabilities
-            while(rsAvailable.next()) {
-                Rows row = new Rows();
-                row.setDate(rsAvailable.getString(2));
-                row.setAm(rsAvailable.getBoolean(4));
-                row.setPm(rsAvailable.getBoolean(5));
-                row.setTerm(rsAvailable.getBoolean(3));
-
-                rsRooms.beforeFirst();
-                // Each available date is for each room so loop through all rooms.
-                while (rsRooms.next()) {
-                    row.setRoomname(rsRooms.getString(2));
-                    row.setSize(rsRooms.getInt(3));
-                    row.setType(rsRooms.getString(4));
-                    list.add(row);
-                }
-            }
-        }catch (Exception e) {
-            System.out.println(e);
-        }
-        // convert list to observable list
-        data = FXCollections.observableList(list);
-        return data;
-    }
 }

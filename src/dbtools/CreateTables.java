@@ -33,10 +33,21 @@ public class CreateTables {
         emp1.setSurname("Scotson");
         emp1.setUsername("test");
 
+        Employee emp2 = new Employee();
+        emp2.setForename("Alex");
+        emp2.setRole("manager");
+        emp2.setSurname("Scotson");
+        emp2.setUsername("man");
+
         Room room1 = new Room();
         room1.setRoomname("SJG/05");
         room1.setSize(20);
         room1.setRoomtype("computer");
+
+        Room room2 = new Room();
+        room2.setRoomname("Lecture Theatre 5");
+        room2.setSize(150);
+        room2.setRoomtype("Lecture");
 
 
         // Inserting employee into DB
@@ -49,7 +60,12 @@ public class CreateTables {
             ps.setString(2, emp1.getSurname());
             ps.setString(3, emp1.getUsername());
             ps.setString(4, emp1.getRole());
+            ps.execute();
 
+            ps.setString(1, emp2.getForename());
+            ps.setString(2, emp2.getSurname());
+            ps.setString(3, emp2.getUsername());
+            ps.setString(4, emp2.getRole());
             ps.execute();
             ps.clearParameters();
 
@@ -57,7 +73,11 @@ public class CreateTables {
             ps.setString(1, room1.getRoomname());
             ps.setInt(2, room1.getSize());
             ps.setString(3, room1.getRoomtype());
+            ps.execute();
 
+            ps.setString(1, room2.getRoomname());
+            ps.setInt(2, room2.getSize());
+            ps.setString(3, room2.getRoomtype());
             ps.execute();
             ps.close();
         } catch (Exception e) {

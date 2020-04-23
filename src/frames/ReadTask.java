@@ -9,12 +9,18 @@ import java.net.Socket;
 public class ReadTask implements Runnable {
     Socket socket;
     BookingController client;
+    ManagerController clientM;
     DataInputStream input;
 
     // Constructor
     public ReadTask(Socket socket, BookingController client) {
         this.socket = socket;
         this.client = client;
+    }
+
+    public ReadTask(Socket socket, ManagerController client) {
+        this.socket = socket;
+        this.clientM = client;
     }
 
     @Override
@@ -27,8 +33,11 @@ public class ReadTask implements Runnable {
                 if (msg.equals("BookingAdded")) {   // check the contents of message, new booking so reset tableview.
                     client.tableView.setItems(null);
                     ObservableList<Rows> data;
-                    data = client.getData();    //get data
+                    TableData tableData = new TableData();
+
+                    data = tableData.getData();    //get data
                     client.setTableView(data);       // send data to client.
+                    clientM.setTableView(data);
                 }
             } catch (Exception ex) {
                 System.out.println("error reading from server");
