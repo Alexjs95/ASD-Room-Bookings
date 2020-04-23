@@ -10,9 +10,9 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="672.0" prefWidth="717.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="frames.BookingController">
+<AnchorPane prefHeight="672.0" prefWidth="772.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="frames.BookingController">
 
-    <TableView fx:id="tableView" layoutX="43.0" layoutY="58.0" prefHeight="300" prefWidth="631.0">
+    <TableView fx:id="tableView" layoutX="43.0" layoutY="58.0" prefHeight="300" prefWidth="690.0">
         <columns>
             <TableColumn fx:id="dateCol" prefWidth="120" text="Date" />
             <TableColumn fx:id="roomnameCol" prefWidth="80" text="Room name" />
@@ -24,7 +24,10 @@
         </columns>
     </TableView>
 
-    <Label layoutX="22.0" layoutY="367.0" text="To make a booking select a row from the table">Booking</Label>
+    <Label layoutX="22.0" layoutY="367.0" text="To make a booking select a row from the table">
+      <font>
+         <Font size="13.0" />
+      </font></Label>
    <Label layoutX="8.0" layoutY="6.0" text="Booking">
       <font>
          <Font size="18.0" />
@@ -48,6 +51,20 @@
    <Label fx:id="lblDate" layoutX="112.0" layoutY="390.0" />
    <Label fx:id="lblRoom" layoutX="112.0" layoutY="407.0" />
    <Label fx:id="lblID" layoutX="394.0" layoutY="33.0" opacity="0.0" />
+   <Label layoutX="359.0" layoutY="416.0" text="Bookings:">
+      <font>
+         <Font size="20.0" />
+      </font>
+   </Label>
+   <TableView fx:id="tableBookings" layoutX="359.0" layoutY="454.0" prefHeight="170.0" prefWidth="376.0">
+     <columns>
+         <TableColumn fx:id="dateCol2" prefWidth="75.0" text="Date" />
+         <TableColumn fx:id="nameCol" prefWidth="75.0" text="Room" />
+         <TableColumn fx:id="bookingForCol" prefWidth="75.0" text="Booked For" />
+         <TableColumn fx:id="contactCol" prefWidth="75.0" text="Contact" />
+         <TableColumn fx:id="notesCol" prefWidth="75.0" text="Notes" />
+     </columns>
+   </TableView>
 
 
 </AnchorPane>
