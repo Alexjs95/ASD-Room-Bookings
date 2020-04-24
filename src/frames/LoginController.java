@@ -53,7 +53,7 @@ public class LoginController implements Initializable  {
             rs = ps.executeQuery();
 
             if (!rs.next()) {       // If the rs if empty then no employee was found.
-                popup("Unsuccessful Login attempt. Please try again.", "Unsuccessful");
+                callPopup("Unsuccessful Login attempt. Please try again.", "Unsuccessful");
                 // Failed Login attempt
             } else {
                 Employee user = new Employee();       // Create a new employee
@@ -91,7 +91,11 @@ public class LoginController implements Initializable  {
         }
     }
 
-    public static void popup(String message, String title) {
+    static void callPopup(String message, String title) {
+        popup(message, title);
+    }
+
+    static void popup(String message, String title) {
         Alert alert =  new Alert(Alert.AlertType.INFORMATION);
         alert.setContentText(message);
         alert.setTitle(title);

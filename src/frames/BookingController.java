@@ -1,11 +1,9 @@
 package frames;
 
-import com.mysql.cj.protocol.Resultset;
 import dbtools.Bookings;
 import dbtools.Employee;
 import dbtools.Rows;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -17,15 +15,12 @@ import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import utils.ConnectionUtil;
 
-import javax.xml.transform.Result;
 import java.io.DataOutputStream;
 import java.net.Socket;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -105,7 +100,7 @@ public class BookingController extends Thread implements Initializable    {
         try {
             Socket socket = new Socket(ConnectionUtil.host, ConnectionUtil.port);
             output = new DataOutputStream(socket.getOutputStream());
-            ReadTask task = new ReadTask(socket, this);
+            ReadBookingTask task = new ReadBookingTask(socket, this);
             Thread thread = new Thread(task);
             thread.start();
         } catch (Exception ex) {

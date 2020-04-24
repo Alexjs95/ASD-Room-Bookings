@@ -20,6 +20,7 @@ public class TableData {
     ResultSet rsRooms = null;
     ResultSet rsAvailable = null;
     ResultSet rsBookings = null;
+    ResultSet rsHolidays = null;
 
     public ObservableList getData() {
         List list = new ArrayList();
@@ -27,10 +28,13 @@ public class TableData {
 
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd");  //formats to SQL format
         LocalDate todayDate = LocalDate.now();       // Get todays today
-
+        boolean term;
+        boolean am;
+        boolean pm;
         String queryRooms = "SELECT * FROM roombookingsystem.rooms";
         String queryAvailable = "SELECT * FROM roombookingsystem.availability WHERE DATE >= ?";
         String queryBookings = "SELECT * FROM roombookingsystem.bookings";
+        String queryHolidays = "SELECT * FROM roombookingsystem.holidays";
         int count = 0;
 
 
@@ -45,31 +49,42 @@ public class TableData {
             ps = conn.prepareStatement(queryBookings);
             rsBookings = ps.executeQuery();
             ps.clearParameters();
+            ps = conn.prepareStatement(queryHolidays);
+            rsHolidays = ps.executeQuery();
+            ps.clearParameters();
 
             // Loops through all availabilities
-            while(rsAvailable.next()) {
+            while (rsHolidays.next()) {
+                String holStart = rsHolidays.getString(2);
+                String holEnd = rsHolidays.getString(3);
+                boolean isHoliday = false;
 
-                String date = rsAvailable.getString(2);
-                boolean term = rsAvailable.getBoolean(3);
-                boolean am = rsAvailable.getBoolean(4);
-                boolean pm = rsAvailable.getBoolean(5);
+                while(rsAvailable.next()) {
+                    String date = rsAvailable.getString(2);
+
+                     term = rsAvailable.getBoolean(3);
+                     am = rsAvailable.getBoolean(4);
+                     pm = rsAvailable.getBoolean(5);
 
 
-                // Each available date is for each room so loop through all rooms.
-                while (rsRooms.next()) {
-                    Rows row = new Rows();
-                    row.setDate(date);
-                    row.setAm(am);
-                    row.setPm(pm);
-                    row.setTerm(term);
-                    row.setRoomname(rsRooms.getString(2));
-                    row.setSize(rsRooms.getInt(3));
-                    row.setType(rsRooms.getString(4));
-                    list.add(count, row);
-                    count ++;
+                    // Each available date is for each room so loop through all rooms.
+                    while (rsRooms.next()) {
+
+                        Rows row = new Rows();
+                        row.setDate(date);
+                        row.setAm(am);
+                        row.setPm(pm);
+                        row.setTerm(term);
+                        row.setRoomname(rsRooms.getString(2));
+                        row.setSize(rsRooms.getInt(3));
+                        row.setType(rsRooms.getString(4));
+                        list.add(count, row);
+                        count ++;
+                    }
+                    rsRooms.beforeFirst();
                 }
-                rsRooms.beforeFirst();
             }
+
         }catch (Exception e) {
             System.out.println(e);
         }

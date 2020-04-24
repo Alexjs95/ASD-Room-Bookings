@@ -1,6 +1,7 @@
 package frames;
 
 import dbtools.Employee;
+import dbtools.Holiday;
 import dbtools.Room;
 import dbtools.Rows;
 import javafx.collections.ObservableList;
@@ -15,13 +16,14 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import utils.ConnectionUtil;
 
-import javax.swing.*;
 import java.io.DataOutputStream;
 import java.net.Socket;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
 
 public class ManagerController extends Thread implements Initializable {
@@ -93,7 +95,7 @@ public class ManagerController extends Thread implements Initializable {
         try {
             Socket socket = new Socket(ConnectionUtil.host, ConnectionUtil.port);
             output = new DataOutputStream(socket.getOutputStream());
-            ReadTask task = new ReadTask(socket, this);
+            ReadManagerTask task = new ReadManagerTask(socket, this);
             Thread thread = new Thread(task);
             thread.start();
         } catch (Exception ex) {
@@ -142,7 +144,68 @@ public class ManagerController extends Thread implements Initializable {
             paneNewRoom.setVisible(true);
         });
 
+        btnAddRoom.setOnAction((ActionEvent event) -> {
+            String name = txtName1.getText();
+            String size = txtSize.getText();
+            String type = txtType.getText();
 
+            Room room = new Room();
+            room.setRoomtype(type);
+            //room.setSize(size);
+        });
+
+        btnRemoveRoom.setOnAction((ActionEvent event) -> {
+
+        });
+
+        btnBook.setOnAction((ActionEvent event) -> {
+
+        });
+
+        btnAddHols.setOnAction((ActionEvent event) -> {
+            LocalDate start = dpStart.getValue();       // get dates from date pickers
+            LocalDate end = dpEnd.getValue();
+            LocalDate date = start;     // set the date as the holiday starting date
+
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd");  //formats to SQL format
+
+            if (start == null || end == null) {
+                callPopup("Ensure you have selected a start and end date for term.", "Missing term date");
+            } else {
+
+                Holiday holiday = new Holiday();        // create a holiday
+                holiday.setStart(dtf.format(start));
+                holiday.setEnd(dtf.format(end));
+
+                String query = "INSERT INTO roombookingsystem.holidays (START, END) VALUES (?,?)";      // inserts holiday
+                String query2 = "UPDATE roombookingsystem.availability SET TERMTIME = ?, AM = ?, PM = ? WHERE DATE = ?";  // updates availabilities
+
+                try {
+                    PreparedStatement ps = conn.prepareStatement(query);    //code for adding holiday to db
+                    ps.setString(1, holiday.getStart());
+                    ps.setString(2, holiday.getEnd());
+                    ps.execute();
+                    ps.close();
+
+                    ps = conn.prepareStatement(query2);
+                    while (date.isBefore(end) || date.equals(end)) {    // loops through the dates between start and end
+                        ps.setBoolean(1, false);        // false for holidays
+                        ps.setBoolean(2, true); // true for am available
+                        ps.setBoolean(3, true); // true for pm available
+                        ps.setString(4, dtf.format(date));
+                        ps.addBatch();
+
+                        date = date.plusDays(1);        // increment date by 1 day
+                    }
+                    ps.executeBatch();
+                    output.writeUTF("BookingAdded");        // inform server of change
+                    output.flush();
+
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
     }
 
     public void setTableView(ObservableList list) {
@@ -150,4 +213,12 @@ public class ManagerController extends Thread implements Initializable {
         tableView.setItems(list);
     }
 
+    public void resetForm() {
+        btnRemoveRoom.setDisable(false);
+
+    }
+
+    static void callPopup(String message, String title) {
+        LoginController.popup(message, title);
+    }
 }

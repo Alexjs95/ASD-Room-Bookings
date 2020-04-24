@@ -13,7 +13,10 @@ import java.util.Arrays;
 // Class should only need to be ran once to set up the DB
 public class CreateTables {
 
+
     public static void main(String[] args) {
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd");  //formats to SQL format
+        LocalDate date = LocalDate.now();       // Get todays today
         Connection conn = ConnectionUtil.connectDB();       // Establish connection to DB
         CreateEmployeeTable employeeTable = new CreateEmployeeTable();      // New employee Table
         employeeTable.create(conn);     // Create the employee table
@@ -26,6 +29,9 @@ public class CreateTables {
 
         CreateBookingTable bookingTable = new CreateBookingTable();
         bookingTable.create(conn);
+
+        CreateHolidayTable holidayTable = new CreateHolidayTable();
+        holidayTable.create(conn);
 
         Employee emp1 = new Employee(); // Create a new Employee
         emp1.setForename("Alex");
@@ -48,7 +54,6 @@ public class CreateTables {
         room2.setRoomname("Lecture Theatre 5");
         room2.setSize(150);
         room2.setRoomtype("Lecture");
-
 
         // Inserting employee into DB
         String query1 =  "INSERT into roombookingsystem.employees (forename, surname, username, role) values (?,?,?,?)";
@@ -84,15 +89,30 @@ public class CreateTables {
             System.out.println(e);
         }
 
+        Holiday holiday = new Holiday();
+        holiday.setStart(dtf.format(date));
+        holiday.setEnd(dtf.format(date.plusDays(5)));       // by default make holiday of 5 days from first day
+
+        String query4 = "INSERT INTO roombookingsystem.holidays (START, END) VALUES (?,?)";     // insert into table
+
+            try {
+                PreparedStatement ps = conn.prepareStatement(query4);
+                ps.setString(1, holiday.getStart());
+                ps.setString(2, holiday.getEnd());
+                ps.execute();
+                ps.close();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+        }
+
         // Inserting 3 months of Room availability into DB.
         String[] schoolDays = {"monday", "tuesday", "wednesday", "thursday", "friday"};
 
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd");  //formats to SQL format
-        LocalDate date = LocalDate.now();       // Get todays today
         LocalDate endDate = date.plusMonths(3);      // Add 3 months to todays date.
 
         String query3 = "INSERT INTO roombookingsystem.availability (DATE, TERMTIME, AM, PM)"
                 + " VALUES " + "(?, ?, ?, ?)";
+        Boolean isHoliday = false;
         try {
             PreparedStatement ps = conn.prepareStatement(query3);
             //Loop through each day between now and the end day, incrementing 1 day at a time.
@@ -100,11 +120,28 @@ public class CreateTables {
                 String day = currdate.getDayOfWeek().toString().toLowerCase();
                 if (Arrays.stream(schoolDays).anyMatch(day::equals)) {      // Checks whether the curr date is a school day
                     ps.setString(1, dtf.format(currdate));
-                    ps.setBoolean(2, true);     // TRUE for TERM time
-                    ps.setBoolean(3, false); // AM not available
-                    ps.setBoolean(4, true);  // PM is available
-                    ps.addBatch();
+
+                    if (dtf.format(currdate).equals(holiday.getStart()) || isHoliday) {     // check if the current date is a holiday
+                        isHoliday = true;
+                        ps.setBoolean(2, false);  // FALSE for holidays
+                        ps.setBoolean(3, true);  // AM is available
+                        ps.setBoolean(4, true);  // PM is available
+                        ps.addBatch();
+                        if (dtf.format(currdate).equals(holiday.getEnd())) {       // if current date is end date
+                            isHoliday = false;      // reset to term time
+                        }
+                    } else {
+                        ps.setBoolean(2, true);     // TRUE for TERM time
+                        ps.setBoolean(3, false); // AM not available
+                        ps.setBoolean(4, true);  // PM is available
+                        ps.addBatch();
+                    }
+
+
                 } else {
+                    if (dtf.format(currdate).equals(holiday.getStart())) {
+                        isHoliday = true;
+                    }
                     ps.setString(1, dtf.format(currdate));
                     ps.setBoolean(2, true);     // FALSE for WEEKENDS
                     ps.setBoolean(3, true); // AM is available
@@ -117,8 +154,6 @@ public class CreateTables {
         } catch (Exception e) {
             System.out.println(e);
         }
-
-
 
         try {
             conn.close();       // Close connection to DB
