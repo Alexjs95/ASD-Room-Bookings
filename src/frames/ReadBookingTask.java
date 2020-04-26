@@ -24,7 +24,7 @@ public class ReadBookingTask implements Runnable {
                 input = new DataInputStream(socket.getInputStream());       // new input
                 String msg = input.readUTF();       // get message from input sent from client.
                 System.out.println(msg);
-                if (msg.equals("BookingAdded")) {   // check the contents of message, new booking so reset tableview.
+                if (msg.equals("RefreshTable")) {   // check the contents of message, new booking so reset tableview.
                     client.tableView.setItems(null);
                     ObservableList<Rows> data;
                     TableData tableData = new TableData();

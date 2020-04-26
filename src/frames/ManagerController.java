@@ -4,8 +4,10 @@ import dbtools.Employee;
 import dbtools.Holiday;
 import dbtools.Room;
 import dbtools.Rows;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
@@ -41,8 +43,8 @@ public class ManagerController extends Thread implements Initializable {
     @FXML Label lblUser;
     @FXML Label lblRoom;
     @FXML TextField txtName;
-    @FXML TextField txtSize;
-    @FXML TextField txtType;
+    @FXML ComboBox<Integer> cbbSize;
+    @FXML ComboBox<String> cbbType;
     @FXML TextField txtName1;
 
     @FXML TextField txtNotes;
@@ -59,8 +61,6 @@ public class ManagerController extends Thread implements Initializable {
     @FXML Button btnRemoveRoom;
     @FXML Button btnAddHols;
 
-
-
     Employee currUser;
     int empID;
     int avail_id;
@@ -75,6 +75,32 @@ public class ManagerController extends Thread implements Initializable {
     DataOutputStream output = null;
 
     private ObservableList<Rows> data;
+    private ObservableList<String> typeOptions = FXCollections.observableArrayList(
+        "Lecture Theatre",
+        "Computer lab",
+        "Seminar room",
+        "Meeting space"
+    );
+
+    private ObservableList<Integer> lectureSizes = FXCollections.observableArrayList(
+           50, 100, 150, 200
+    );
+
+    private ObservableList<Integer> pcLabSizes = FXCollections.observableArrayList(
+            10, 20, 30, 40
+    );
+
+    private ObservableList<Integer> seminarSizes = FXCollections.observableArrayList(
+            10, 20, 30, 40
+    );
+
+    private ObservableList<Integer> meetingSizes = FXCollections.observableArrayList(
+            5, 10, 15, 20
+    );
+
+    //final ComboBox cbbType = new ComboBox(typeOptions);
+    //ComboBox cbbSize = new ComboBox();
+
 
     public ManagerController() {
         conn = ConnectionUtil.connectDB();
@@ -105,6 +131,8 @@ public class ManagerController extends Thread implements Initializable {
         TableData tableData = new TableData();
         data = tableData.getData();
         tableView.setItems(data);
+
+        cbbType.setItems(typeOptions);
 
         // Row click event
         tableView.setOnMouseClicked((MouseEvent event) -> {
@@ -145,18 +173,63 @@ public class ManagerController extends Thread implements Initializable {
         });
 
         btnAddRoom.setOnAction((ActionEvent event) -> {
-            String name = txtName1.getText();
-            String size = txtSize.getText();
-            String type = txtType.getText();
+            String name = txtName.getText();
+            String type = cbbType.getValue().toString();
+            int size = cbbSize.getValue();
 
-            Room room = new Room();
-            room.setRoomtype(type);
-            //room.setSize(size);
+            if (name.equals("") || type.equals("") || size == 0) {
+                callPopup("To add new room you must enter the name, select the type of room and the size", "New room error");
+            } else {
+                Room room = new Room();
+                room.setRoomname(name);
+                room.setRoomtype(type);
+                room.setSize(size);
+
+                String query = "INSERT into roombookingsystem.rooms (NAME, SIZE, TYPE) VALUES (?, ?, ?)";
+                try {
+                    PreparedStatement ps = conn.prepareStatement(query);    //code for adding holiday to db
+                    ps.setString(1, room.getRoomname());
+                    ps.setInt(2, room.getSize());
+                    ps.setString(3, room.getRoomtype());
+                    ps.execute();
+                    ps.close();
+
+                    callPopup("Room sucessfully added to system", "Room added");
+                    resetForm();
+                    output.writeUTF("RefreshTable");        // inform server of change
+                    output.flush();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+
+
         });
 
         btnRemoveRoom.setOnAction((ActionEvent event) -> {
 
         });
+
+
+        cbbType.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                String val = cbbType.getValue().toString();
+                if (val.equals("Lecture Theatre")) {
+                    cbbSize.setItems(lectureSizes);
+                } else if (val.equals("Computer lab")) {
+                    cbbSize.setItems(pcLabSizes);
+                } else if (val.equals("Seminar room")) {
+                    cbbSize.setItems(seminarSizes);
+                } else if (val.equals("Meeting space")) {
+                    cbbSize.setItems(meetingSizes);
+                } else {
+                    cbbSize.setItems(null);
+                }
+
+            }
+        });
+
 
         btnBook.setOnAction((ActionEvent event) -> {
 
@@ -198,7 +271,7 @@ public class ManagerController extends Thread implements Initializable {
                         date = date.plusDays(1);        // increment date by 1 day
                     }
                     ps.executeBatch();
-                    output.writeUTF("BookingAdded");        // inform server of change
+                    output.writeUTF("RefreshTable");        // inform server of change
                     output.flush();
 
                 } catch (Exception ex) {
@@ -215,7 +288,10 @@ public class ManagerController extends Thread implements Initializable {
 
     public void resetForm() {
         btnRemoveRoom.setDisable(false);
-
+        txtName.setText("");
+        cbbType.setItems(typeOptions);
+        cbbSize.setItems(null);
+        paneNewRoom.setVisible(false);
     }
 
     static void callPopup(String message, String title) {

@@ -222,7 +222,7 @@ public class BookingController extends Thread implements Initializable    {
 
                 ps4.execute();
 
-                output.writeUTF("BookingAdded");
+                output.writeUTF("RefreshTable");
                 output.flush();
 
                 resetForm();
