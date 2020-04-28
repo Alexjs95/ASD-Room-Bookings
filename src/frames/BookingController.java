@@ -5,7 +5,10 @@ import dbtools.Employee;
 import dbtools.Rows;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
@@ -15,15 +18,19 @@ import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import utils.ConnectionUtil;
 
+import javax.swing.*;
 import java.io.DataOutputStream;
 import java.net.Socket;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.function.Predicate;
+import java.util.logging.Filter;
 
 public class BookingController extends Thread implements Initializable    {
     @FXML public TableView<Rows> tableView = new TableView<Rows>();
@@ -53,6 +60,9 @@ public class BookingController extends Thread implements Initializable    {
     @FXML CheckBox chkAM;
     @FXML CheckBox chkPM;
     @FXML Button btnBook;
+    @FXML DatePicker dpDateFilter;
+    @FXML Button btnResetFilter;
+    @FXML ComboBox<String> cbTypeFilter;
 
     private ObservableList<Rows> data;
     private ObservableList<Bookings> bookings;
@@ -72,6 +82,13 @@ public class BookingController extends Thread implements Initializable    {
 
     int avail_id;
     int room_id;
+
+    private ObservableList<String> typeOptions = FXCollections.observableArrayList(
+            "Lecture Theatre",
+            "Computer lab",
+            "Seminar room",
+            "Meeting space"
+    );
 
     public BookingController() {
         conn = ConnectionUtil.connectDB();
@@ -110,6 +127,8 @@ public class BookingController extends Thread implements Initializable    {
         TableData tableData = new TableData();
         data = tableData.getData();
         tableView.setItems(data);
+
+        cbTypeFilter.setItems(typeOptions);
 
         // Row click event
         tableView.setOnMouseClicked((MouseEvent event) -> {
@@ -166,6 +185,42 @@ public class BookingController extends Thread implements Initializable    {
                 tableBookings.setItems(bookings);
             }
         });
+
+        dpDateFilter.setOnAction((ActionEvent -> {
+            LocalDate date = dpDateFilter.getValue();       // get dates from date pickers
+
+            FilteredList<Rows> filteredList = new FilteredList<>(data, p-> true);
+            filteredList.setPredicate(rows -> {
+                if (rows.getDate().equals(date.toString())) {       // compare date to selected data
+                    return true;
+                } else {
+                    return false;
+                }
+            });
+            SortedList<Rows> sortedList = new SortedList<>(filteredList);   // wrap filtered list into sorted list
+            sortedList.comparatorProperty().bind(tableView.comparatorProperty());
+            tableView.setItems(sortedList);
+
+        }));
+
+        btnResetFilter.setOnAction((ActionEvent -> {
+            tableView.setItems(data);
+        }));
+
+        cbTypeFilter.setOnAction((ActionEvent -> {
+            String type = cbTypeFilter.getValue();
+            FilteredList<Rows> filteredList = new FilteredList<>(data, p-> true);
+            filteredList.setPredicate(rows -> {
+                if (rows.getType().equals(type)) { // compare type of room in table to selected type.
+                    return true;
+                } else {
+                    return false;
+                }
+            });
+            SortedList<Rows> sortedList = new SortedList<>(filteredList);
+            sortedList.comparatorProperty().bind(tableView.comparatorProperty());
+            tableView.setItems(sortedList);
+        }));
 
         btnBook.setOnAction((ActionEvent event) -> {
             String bookingFor = txtName.getText();

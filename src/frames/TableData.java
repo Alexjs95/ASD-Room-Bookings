@@ -55,13 +55,8 @@ public class TableData {
 
             // Loops through all availabilities
             while (rsHolidays.next()) {
-                String holStart = rsHolidays.getString(2);
-                String holEnd = rsHolidays.getString(3);
-                boolean isHoliday = false;
-
                 while(rsAvailable.next()) {
                     String date = rsAvailable.getString(2);
-
                      term = rsAvailable.getBoolean(3);
                      am = rsAvailable.getBoolean(4);
                      pm = rsAvailable.getBoolean(5);
