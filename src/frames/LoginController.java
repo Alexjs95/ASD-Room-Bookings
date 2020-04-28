@@ -72,6 +72,8 @@ public class LoginController implements Initializable  {
 
                     FXMLLoader loader = new FXMLLoader(getClass().getResource("Manager.fxml"));
                     dialog.setScene(new Scene(loader.load()));
+                    ManagerController mc = loader.getController();
+                    mc.setUser(user, id);
                     //BookingController bc = loader.getController();
                     //bc.setUser(user, id);
                 } else {

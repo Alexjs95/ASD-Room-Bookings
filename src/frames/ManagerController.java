@@ -65,6 +65,7 @@ public class ManagerController extends Thread implements Initializable {
     int empID;
     int avail_id;
     int room_id;
+    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd");
 
     Stage dialog = new Stage();
     Scene scene;
@@ -98,8 +99,14 @@ public class ManagerController extends Thread implements Initializable {
             5, 10, 15, 20
     );
 
-    //final ComboBox cbbType = new ComboBox(typeOptions);
-    //ComboBox cbbSize = new ComboBox();
+    private ObservableList<Integer> bookForDays = FXCollections.observableArrayList(
+            1, 2, 3, 4, 5, 6, 7
+    );
+
+    private ObservableList<Integer> bookForWeeks = FXCollections.observableArrayList(
+            1, 2, 3, 4
+    );
+
 
 
     public ManagerController() {
@@ -133,6 +140,9 @@ public class ManagerController extends Thread implements Initializable {
         tableView.setItems(data);
 
         cbbType.setItems(typeOptions);
+        cbDays.setItems(bookForDays);
+        cbWeeks.setItems(bookForWeeks);
+
 
         // Row click event
         tableView.setOnMouseClicked((MouseEvent event) -> {
@@ -141,8 +151,6 @@ public class ManagerController extends Thread implements Initializable {
                 String room = selectedItem.getRoomname();
                 String date = selectedItem.getDate();
                 lblRoom.setText(room);
-
-
 
                 String getAvailID = "SELECT * FROM roombookingsystem.availability where DATE = ?";
                 String getRoomID = "SELECT * FROM roombookingsystem.rooms where NAME = ?";
@@ -164,7 +172,13 @@ public class ManagerController extends Thread implements Initializable {
                     e.printStackTrace();
                 }
 
-
+                txtName1.setDisable(false);
+                txtNotes.setDisable(false);
+                chkAM.setDisable(false);
+                chkPM.setDisable(false);
+                cbDays.setDisable(false);
+                cbWeeks.setDisable(false);
+                btnBook.setDisable(false);
 
             }
         });
@@ -174,7 +188,7 @@ public class ManagerController extends Thread implements Initializable {
 
         btnAddRoom.setOnAction((ActionEvent event) -> {
             String name = txtName.getText();
-            String type = cbbType.getValue().toString();
+            String type = cbbType.getValue();
             int size = cbbSize.getValue();
 
             if (name.equals("") || type.equals("") || size == 0) {
@@ -202,8 +216,6 @@ public class ManagerController extends Thread implements Initializable {
                     ex.printStackTrace();
                 }
             }
-
-
         });
 
         btnRemoveRoom.setOnAction((ActionEvent event) -> {
@@ -233,14 +245,106 @@ public class ManagerController extends Thread implements Initializable {
 
         btnBook.setOnAction((ActionEvent event) -> {
 
+
+            String bookingFor = txtName1.getText();
+            Boolean am = chkAM.isSelected();
+            Boolean pm = chkPM.isSelected();
+            String contact = lblUser.getText();
+            String notes = txtNotes.getText();
+            String date = selectedItem.getDate();
+            LocalDate startDate = LocalDate.parse(date);
+            LocalDate endDate = startDate;
+
+            int days = 0;
+            int weeks = 0;
+
+
+            try {
+                days = (int) cbDays.getValue();
+            } catch (Exception e) { }
+            try {
+                weeks = (int) cbWeeks.getValue();
+            } catch (Exception e) { }
+
+            if (bookingFor.isEmpty() || notes.isEmpty() || (!am && !pm) || (days == 0 && weeks == 0)) {
+                callPopup("You must enter who the booking is for, select whether it will be AM or PM or both " +
+                        "and enter reasons why it'll be unavailable. Also for how long the room will be unavailable for in either days and/or weeks.", "Missing details");
+            } else {
+                String makeBooking = "INSERT into roombookingsystem.bookings (ROOM_ID, AVAILABILITY_ID, EMPLOYEE_ID, BOOKED_FOR, CONTACT, NOTES) VALUES (?,?,?,?,?,?)";
+                String getAvailID = "SELECT * FROM roombookingsystem.availability where DATE = ?";
+                String updateAvailabilities = "UPDATE roombookingsystem.availability SET AM = ?, PM = ? WHERE availability_ID = ?";
+
+
+                if (days != 0 && weeks != 0) {      // if both days and weeks are not 0 then
+                    endDate = endDate.plusDays(days);       // add days to end date
+                    endDate = endDate.plusWeeks(weeks);     // add weeks to end date
+                } else if (days != 0) {     // if only days is not empty
+                    endDate = endDate.plusDays(days);       // only add days
+                } else if (weeks != 0) {       // same for weeks
+                    endDate = endDate.plusWeeks(weeks);
+                }
+
+                try {
+                    PreparedStatement ps;
+                    while (startDate.isBefore(endDate) || date.equals(endDate)) {       // loop between start and end
+                        ps = conn.prepareStatement(getAvailID); // get availability id for the current date
+                        ps.setString(1, startDate.toString());
+                        ResultSet rs = ps.executeQuery();
+                        rs.first();
+                        int a_id = rs.getInt(1);
+                        boolean getAM = rs.getBoolean(4);
+                        boolean getPM = rs.getBoolean(5);
+
+                        if (chkAM.isSelected() && chkPM.isSelected()) { // booking for AM and PM
+                            am = false;
+                            pm = false;
+                        } else if (chkAM.isSelected()) {    // Booking just for AM
+                            am = false;     // No longer available.
+                            if (getPM) {   // Check if PM in is available.
+                                pm = true;  // Change to true as room is available and not being booked.
+                            }
+                        } else if (chkPM.isSelected()) {    // Booking room at PM.
+                            pm = false;     // room becomes unavailable.
+                            if (getAM) {  // Check whether AM is available.
+                                am = true;      // set am to true so it stays available.
+                            }
+                        }
+
+                        ps.clearParameters();
+
+                        ps = conn.prepareStatement(makeBooking);       // update bookings table
+                        ps.setInt(1, room_id);
+                        ps.setInt(2, a_id);     // insert current availability id into query
+                        ps.setInt(3, empID);
+                        ps.setString(4, bookingFor);
+                        ps.setString(5, contact);
+                        ps.setString(6, notes);
+                        ps.execute();
+
+                        ps.clearParameters();
+                        ps = conn.prepareStatement(updateAvailabilities);   // update availabilities table
+                        ps.setBoolean(1, am);
+                        ps.setBoolean(2, pm);
+                        ps.setInt(3, a_id);
+                        ps.execute();
+                        startDate = startDate.plusDays(1);
+                        ps.clearParameters();
+                    }
+
+                    output.writeUTF("RefreshTable");
+                    output.flush();
+
+                    resetForm();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
         });
 
         btnAddHols.setOnAction((ActionEvent event) -> {
             LocalDate start = dpStart.getValue();       // get dates from date pickers
             LocalDate end = dpEnd.getValue();
             LocalDate date = start;     // set the date as the holiday starting date
-
-            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd");  //formats to SQL format
 
             if (start == null || end == null) {
                 callPopup("Ensure you have selected a start and end date for term.", "Missing term date");
@@ -281,6 +385,11 @@ public class ManagerController extends Thread implements Initializable {
         });
     }
 
+    void setUser(Employee employee, int id) {
+        lblUser.setText(employee.getUsername());
+        empID = id;
+    }
+
     public void setTableView(ObservableList list) {
         data = list;
         tableView.setItems(list);
@@ -292,6 +401,19 @@ public class ManagerController extends Thread implements Initializable {
         cbbType.setItems(typeOptions);
         cbbSize.setItems(null);
         paneNewRoom.setVisible(false);
+        txtName1.setText("");
+        txtNotes.setText("");
+
+
+        txtName1.setDisable(true);
+        txtNotes.setDisable(true);
+        chkAM.setDisable(true);
+        chkPM.setDisable(true);
+        cbDays.setDisable(true);
+        cbWeeks.setDisable(true);
+        btnBook.setDisable(true);
+        cbDays.setValue(0);
+        cbWeeks.setValue(0);
     }
 
     static void callPopup(String message, String title) {

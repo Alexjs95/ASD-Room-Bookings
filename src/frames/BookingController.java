@@ -174,61 +174,59 @@ public class BookingController extends Thread implements Initializable    {
             Boolean am = chkAM.isSelected();
             Boolean pm = chkPM.isSelected();
 
-            // Ensure all values contain something
-            // ensure at least 1 check box is selected
-            // dont allow both check boxes to be selected
 
+            if (bookingFor.isEmpty() || contact.isEmpty() || notes.isEmpty() || !am && !pm) {
+                callPopup("You must enter who the booking is for, select whether it will be AM or PM or both " +
+                        " enter contact details and include notes.", "Missing details");
+            } else {
+                String makeBooking = "INSERT into roombookingsystem.bookings (ROOM_ID, AVAILABILITY_ID, EMPLOYEE_ID, BOOKED_FOR, CONTACT, NOTES) VALUES (?,?,?,?,?,?)";
+                String updateAvailabilities = "UPDATE roombookingsystem.availability SET AM = ?, PM = ? WHERE availability_ID = ?";
 
-
-            String makeBooking = "INSERT into roombookingsystem.bookings (ROOM_ID, AVAILABILITY_ID, EMPLOYEE_ID, BOOKED_FOR, CONTACT, NOTES) VALUES (?,?,?,?,?,?)";
-            //String getAvailID = "SELECT * FROM roombookingsystem.availability where DATE = ?";
-            //String getRoomID = "SELECT * FROM roombookingsystem.rooms where NAME = ?";
-            String updateAvailabilities = "UPDATE roombookingsystem.availability SET AM = ?, PM = ? WHERE availability_ID = ?";
-
-            try {
-
-                if (am && pm) { // Booking for AM and PM
-                    am = false;
-                    pm = false;
-                    notes = notes + " Booked for AM & PM";
-                } else if (am) {    // Booking just for AM
-                    am = false;     // No longer available.
-                    notes = notes + " Booked for AM";
-                    if (selectedItem.isPm()) {   // Check if PM in is available.
-                        pm = true;  // Change to true as room is available and not being booked.
+                try {
+                    if (am && pm) { // booking for AM and PM
+                        am = false;
+                        pm = false;
+                        notes = notes + " Booked for AM & PM";
+                    } else if (am) {    // Booking just for AM
+                        am = false;     // No longer available.
+                        notes = notes + " Booked for AM";
+                        if (selectedItem.isPm()) {   // Check if PM in is available.
+                            pm = true;  // Change to true as room is available and not being booked.
+                        }
+                    } else if (pm) {    // Booking room at PM.
+                        pm = false;     // room becomes unavailable.
+                        notes = notes + " Booked for PM";
+                        if (selectedItem.isAm()) {  // Check whether AM is available.
+                            am = true;      // set am to true so it stays available.
+                        }
                     }
-                } else if (pm) {    // Booking room at PM.
-                    pm = false;     // room becomes unavailable.
-                    notes = notes + " Booked for PM";
-                    if (selectedItem.isAm()) {  // Check whether AM is available.
-                        am = true;      // set am to true so it stays available.
-                    }
+
+                    PreparedStatement ps3 = conn.prepareStatement(makeBooking);
+                    ps3.setInt(1, room_id);
+                    ps3.setInt(2, avail_id);
+                    ps3.setInt(3, empID);
+                    ps3.setString(4, bookingFor);
+                    ps3.setString(5, contact);
+                    ps3.setString(6, notes);
+
+                    ps3.execute();
+
+                    PreparedStatement ps4 = conn.prepareStatement(updateAvailabilities);
+                    ps4.setBoolean(1, am);
+                    ps4.setBoolean(2, pm);
+                    ps4.setInt(3, avail_id);
+
+                    ps4.execute();
+
+                    output.writeUTF("RefreshTable");
+                    output.flush();
+
+                    resetForm();
+
+                } catch (Exception e) {
+                    callPopup("Booking failed", "Booking failed");
+                    System.out.println(e);
                 }
-
-                PreparedStatement ps3 = conn.prepareStatement(makeBooking);
-                ps3.setInt(1, room_id);
-                ps3.setInt(2, avail_id);
-                ps3.setInt(3, empID);
-                ps3.setString(4, bookingFor);
-                ps3.setString(5, contact);
-                ps3.setString(6, notes);
-
-                ps3.execute();
-
-                PreparedStatement ps4 = conn.prepareStatement(updateAvailabilities);
-                ps4.setBoolean(1, am);
-                ps4.setBoolean(2, pm);
-                ps4.setInt(3, avail_id);
-
-                ps4.execute();
-
-                output.writeUTF("RefreshTable");
-                output.flush();
-
-                resetForm();
-
-            } catch (Exception e) {
-                System.out.println(e);
             }
         });
 
@@ -290,6 +288,7 @@ public class BookingController extends Thread implements Initializable    {
         bookings = FXCollections.observableList(list);
     }
 
-
-
+    static void callPopup(String message, String title) {
+        LoginController.popup(message, title);
+    }
 }

@@ -53,14 +53,14 @@
       <Label layoutX="29.0" layoutY="452.0" prefHeight="17.0" prefWidth="89.0" text="Booking for:" />
       <Label layoutX="29.0" layoutY="488.0" text="Select Period" />
       <Label layoutX="29.0" layoutY="521.0" text="Reason for unavailability" />
-      <CheckBox fx:id="chkAM" layoutX="118.0" layoutY="488.0" mnemonicParsing="false" text="AM" />
-      <CheckBox fx:id="chkPM" layoutX="180.0" layoutY="488.0" mnemonicParsing="false" text="PM" />
-      <TextField fx:id="txtNotes" layoutX="168.0" layoutY="517.0" prefHeight="25.0" prefWidth="206.0" />
-      <TextField fx:id="txtName1" layoutX="122.0" layoutY="448.0" />
-      <Button fx:id="btnBook" layoutX="27.0" layoutY="617.0" mnemonicParsing="false" text="Make Booking" />
+      <CheckBox fx:id="chkAM" disable="true" layoutX="118.0" layoutY="488.0" mnemonicParsing="false" text="AM" />
+      <CheckBox fx:id="chkPM" disable="true" layoutX="180.0" layoutY="488.0" mnemonicParsing="false" text="PM" />
+      <TextField fx:id="txtNotes" disable="true" layoutX="168.0" layoutY="517.0" prefHeight="25.0" prefWidth="206.0" />
+      <TextField fx:id="txtName1" disable="true" layoutX="122.0" layoutY="448.0" />
+      <Button fx:id="btnBook" disable="true" layoutX="27.0" layoutY="617.0" mnemonicParsing="false" text="Make Booking" />
       <Button fx:id="btnRemoveRoom" layoutX="568.0" layoutY="389.0" mnemonicParsing="false" text="Remove selected room" />
-      <ChoiceBox fx:id="cbDays" layoutX="29.0" layoutY="577.0" prefWidth="150.0" />
-      <ChoiceBox fx:id="cbWeeks" layoutX="196.0" layoutY="577.0" prefWidth="150.0" />
+      <ChoiceBox fx:id="cbDays" disable="true" layoutX="29.0" layoutY="577.0" prefWidth="150.0" />
+      <ChoiceBox fx:id="cbWeeks" disable="true" layoutX="196.0" layoutY="577.0" prefWidth="150.0" />
       <Label layoutX="27.0" layoutY="553.0" text="Select days and or weeks the room will be  unavailable for" />
       <Label layoutX="773.0" layoutY="393.0" text="Add Holidays to system">
          <font>

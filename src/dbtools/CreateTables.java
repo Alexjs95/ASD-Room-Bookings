@@ -141,6 +141,8 @@ public class CreateTables {
                 } else {
                     if (dtf.format(currdate).equals(holiday.getStart())) {
                         isHoliday = true;
+                    } else if (dtf.format(currdate).equals(holiday.getEnd())) {       // if current date is end date
+                        isHoliday = false;      // reset to term time)
                     }
                     ps.setString(1, dtf.format(currdate));
                     ps.setBoolean(2, true);     // FALSE for WEEKENDS
