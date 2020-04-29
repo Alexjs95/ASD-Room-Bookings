@@ -58,19 +58,29 @@
       <TextField fx:id="txtNotes" disable="true" layoutX="168.0" layoutY="517.0" prefHeight="25.0" prefWidth="206.0" />
       <TextField fx:id="txtName1" disable="true" layoutX="122.0" layoutY="448.0" />
       <Button fx:id="btnBook" disable="true" layoutX="27.0" layoutY="617.0" mnemonicParsing="false" text="Make Booking" />
-      <Button fx:id="btnRemoveRoom" layoutX="568.0" layoutY="389.0" mnemonicParsing="false" text="Remove selected room" />
+      <Button fx:id="btnRemoveRoom" disable="true" layoutX="557.0" layoutY="389.0" mnemonicParsing="false" text="Remove selected room" />
       <ChoiceBox fx:id="cbDays" disable="true" layoutX="29.0" layoutY="577.0" prefWidth="150.0" />
       <ChoiceBox fx:id="cbWeeks" disable="true" layoutX="196.0" layoutY="577.0" prefWidth="150.0" />
       <Label layoutX="27.0" layoutY="553.0" text="Select days and or weeks the room will be  unavailable for" />
-      <Label layoutX="773.0" layoutY="393.0" text="Add Holidays to system">
+      <Label layoutX="777.0" layoutY="496.0" text="Add Holidays to system">
          <font>
             <Font size="14.0" />
          </font>
       </Label>
-      <DatePicker fx:id="dpStart" layoutX="856.0" layoutY="423.0" />
-      <Label layoutX="773.0" layoutY="427.0" text="Holiday Starts" />
-      <Label layoutX="773.0" layoutY="461.0" text="Holiday Ends" />
-      <DatePicker fx:id="dpEnd" layoutX="856.0" layoutY="461.0" />
-      <Button fx:id="btnAddHols" layoutX="773.0" layoutY="517.0" mnemonicParsing="false" text="Add Holidays" />
+      <DatePicker fx:id="dpStart" layoutX="860.0" layoutY="526.0" />
+      <Label layoutX="777.0" layoutY="530.0" text="Holiday Starts" />
+      <Label layoutX="779.0" layoutY="569.0" text="Holiday Ends" />
+      <DatePicker fx:id="dpEnd" layoutX="860.0" layoutY="564.0" />
+      <Button fx:id="btnAddHols" layoutX="777.0" layoutY="620.0" mnemonicParsing="false" text="Add Holidays" />
+      <Label layoutX="776.0" layoutY="72.0" text="Filter table">
+         <font>
+            <Font size="16.0" />
+         </font>
+      </Label>
+      <DatePicker fx:id="dpDateFilter" layoutX="818.0" layoutY="96.0" />
+      <ComboBox fx:id="cbTypeFilter" layoutX="818.0" layoutY="136.0" prefHeight="25.0" prefWidth="174.0" />
+      <Label layoutX="777.0" layoutY="100.0" text="Date:" />
+      <Label layoutX="776.0" layoutY="140.0" text="Type:" />
+      <Button fx:id="btnResetFilter" layoutX="776.0" layoutY="183.0" mnemonicParsing="false" text="Reset Filter" />
    </children>
 </AnchorPane>

@@ -1,11 +1,14 @@
 package frames;
 
+import com.mysql.cj.result.Row;
 import dbtools.Employee;
 import dbtools.Holiday;
 import dbtools.Room;
 import dbtools.Rows;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -27,6 +30,7 @@ import java.sql.ResultSet;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
+import java.util.function.Predicate;
 
 public class ManagerController extends Thread implements Initializable {
     @FXML
@@ -54,12 +58,15 @@ public class ManagerController extends Thread implements Initializable {
     @FXML ChoiceBox cbWeeks;
     @FXML DatePicker dpStart;
     @FXML DatePicker dpEnd;
+    @FXML DatePicker dpDateFilter;
+    @FXML ComboBox<String> cbTypeFilter;
 
     @FXML Button btnBook;
     @FXML Button btnNewRoom;
     @FXML Button btnAddRoom;
     @FXML Button btnRemoveRoom;
     @FXML Button btnAddHols;
+    @FXML Button btnResetFilter;
 
     Employee currUser;
     int empID;
@@ -139,9 +146,10 @@ public class ManagerController extends Thread implements Initializable {
         data = tableData.getData();
         tableView.setItems(data);
 
-        cbbType.setItems(typeOptions);
+        cbbType.setItems(typeOptions);      // add options to combo boxes
         cbDays.setItems(bookForDays);
         cbWeeks.setItems(bookForWeeks);
+        cbTypeFilter.setItems(typeOptions);
 
 
         // Row click event
@@ -150,7 +158,7 @@ public class ManagerController extends Thread implements Initializable {
                 selectedItem = tableView.getSelectionModel().getSelectedItem();
                 String room = selectedItem.getRoomname();
                 String date = selectedItem.getDate();
-                lblRoom.setText(room);
+                lblRoom.setText("Selected room: " + room);
 
                 String getAvailID = "SELECT * FROM roombookingsystem.availability where DATE = ?";
                 String getRoomID = "SELECT * FROM roombookingsystem.rooms where NAME = ?";
@@ -185,6 +193,46 @@ public class ManagerController extends Thread implements Initializable {
         btnNewRoom.setOnAction((ActionEvent event) -> {
             paneNewRoom.setVisible(true);
         });
+
+
+        dpDateFilter.setOnAction((ActionEvent -> {
+            LocalDate date = dpDateFilter.getValue();       // get dates from date pickers
+
+            FilteredList<Rows> filteredList = new FilteredList<>(data, p-> true);
+            filteredList.setPredicate(rows -> {
+                if (rows.getDate().equals(date.toString())) {       // compare date to selected data
+                    return true;
+                } else {
+                    return false;
+                }
+            });
+            SortedList<Rows> sortedList = new SortedList<>(filteredList);   // wrap filtered list into sorted list
+            sortedList.comparatorProperty().bind(tableView.comparatorProperty());
+            tableView.setItems(sortedList);
+        }));
+
+        btnResetFilter.setOnAction((ActionEvent -> {
+            tableView.setItems(data);
+        }));
+
+        cbTypeFilter.setOnAction((ActionEvent -> {
+            String type = cbTypeFilter.getValue();
+
+            FilteredList<Rows> filteredList = new FilteredList<>(data, p-> true);
+            filteredList.setPredicate(rows -> {
+                if (rows.getType().equals(type)) { // compare type of room in table to selected type.
+                    return true;
+                } else {
+                    return false;
+                }
+            });
+            SortedList<Rows> sortedList = new SortedList<>(filteredList);
+            sortedList.comparatorProperty().bind(tableView.comparatorProperty());
+            tableView.setItems(sortedList);
+
+        }));
+
+
 
         btnAddRoom.setOnAction((ActionEvent event) -> {
             String name = txtName.getText();
@@ -238,14 +286,11 @@ public class ManagerController extends Thread implements Initializable {
                 } else {
                     cbbSize.setItems(null);
                 }
-
             }
         });
 
 
         btnBook.setOnAction((ActionEvent event) -> {
-
-
             String bookingFor = txtName1.getText();
             Boolean am = chkAM.isSelected();
             Boolean pm = chkPM.isSelected();
@@ -273,7 +318,6 @@ public class ManagerController extends Thread implements Initializable {
                 String makeBooking = "INSERT into roombookingsystem.bookings (ROOM_ID, AVAILABILITY_ID, EMPLOYEE_ID, BOOKED_FOR, CONTACT, NOTES) VALUES (?,?,?,?,?,?)";
                 String getAvailID = "SELECT * FROM roombookingsystem.availability where DATE = ?";
                 String updateAvailabilities = "UPDATE roombookingsystem.availability SET AM = ?, PM = ? WHERE availability_ID = ?";
-
 
                 if (days != 0 && weeks != 0) {      // if both days and weeks are not 0 then
                     endDate = endDate.plusDays(days);       // add days to end date
@@ -415,6 +459,8 @@ public class ManagerController extends Thread implements Initializable {
         cbDays.setValue(0);
         cbWeeks.setValue(0);
     }
+
+
 
     static void callPopup(String message, String title) {
         LoginController.popup(message, title);
