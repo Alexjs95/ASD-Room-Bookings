@@ -29,6 +29,7 @@ public class ReadManagerTask implements Runnable {
                     ObservableList<Rows> data;
                     TableData tableData = new TableData();
                     data = tableData.getData();
+                    Mclient.resetForm();
                     Mclient.setTableView(data);
                 }
             } catch (Exception ex) {

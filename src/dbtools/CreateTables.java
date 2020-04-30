@@ -34,26 +34,26 @@ public class CreateTables {
         holidayTable.create(conn);
 
         Employee emp1 = new Employee(); // Create a new Employee
-        emp1.setForename("Alex");
+        emp1.setForename("John");
         emp1.setRole("booking");
-        emp1.setSurname("Scotson");
+        emp1.setSurname("Smith");
         emp1.setUsername("test");
 
         Employee emp2 = new Employee();
         emp2.setForename("Alex");
         emp2.setRole("manager");
         emp2.setSurname("Scotson");
-        emp2.setUsername("man");
+        emp2.setUsername("manager");
 
         Room room1 = new Room();
         room1.setRoomname("SJG/05");
         room1.setSize(20);
-        room1.setRoomtype("computer");
+        room1.setRoomtype("Computer lab");
 
         Room room2 = new Room();
-        room2.setRoomname("Lecture Theatre 5");
+        room2.setRoomname("Shed");
         room2.setSize(150);
-        room2.setRoomtype("Lecture");
+        room2.setRoomtype("Lecture Theatre");
 
         // Inserting employee into DB
         String query1 =  "INSERT into roombookingsystem.employees (forename, surname, username, role) values (?,?,?,?)";

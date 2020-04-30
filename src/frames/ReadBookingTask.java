@@ -29,6 +29,7 @@ public class ReadBookingTask implements Runnable {
                     ObservableList<Rows> data;
                     TableData tableData = new TableData();
                     data = tableData.getData();
+                    client.resetForm();
                     client.setTableView(data);
 
                 }

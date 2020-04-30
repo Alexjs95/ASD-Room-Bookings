@@ -230,9 +230,9 @@ public class BookingController extends Thread implements Initializable    {
             Boolean pm = chkPM.isSelected();
 
 
-            if (bookingFor.isEmpty() || contact.isEmpty() || notes.isEmpty() || !am && !pm) {
-                callPopup("You must enter who the booking is for, select whether it will be AM or PM or both " +
-                        " enter contact details and include notes.", "Missing details");
+            if (bookingFor.isEmpty() || contact.isEmpty() || !am && !pm) {
+                callPopup("You must enter who the booking is for, select whether it will be AM or PM or both and " +
+                        " enter contact details.", "Missing details");
             } else {
                 String makeBooking = "INSERT into roombookingsystem.bookings (ROOM_ID, AVAILABILITY_ID, EMPLOYEE_ID, BOOKED_FOR, CONTACT, NOTES) VALUES (?,?,?,?,?,?)";
                 String updateAvailabilities = "UPDATE roombookingsystem.availability SET AM = ?, PM = ? WHERE availability_ID = ?";
@@ -310,6 +310,7 @@ public class BookingController extends Thread implements Initializable    {
         txtContact.setDisable(false);
         txtName.setDisable(false);
         txtNotes.setDisable(false);
+        tableBookings.setItems(null);
     }
 
     public void setTableView(ObservableList list) {

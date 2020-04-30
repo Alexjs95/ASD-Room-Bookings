@@ -187,7 +187,7 @@ public class ManagerController extends Thread implements Initializable {
                 cbDays.setDisable(false);
                 cbWeeks.setDisable(false);
                 btnBook.setDisable(false);
-
+                btnRemoveRoom.setDisable(false);
             }
         });
         btnNewRoom.setOnAction((ActionEvent event) -> {
@@ -267,28 +267,48 @@ public class ManagerController extends Thread implements Initializable {
         });
 
         btnRemoveRoom.setOnAction((ActionEvent event) -> {
+            String room = selectedItem.getRoomname();
 
-        });
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Delete " + room + " and associated bookings? ", ButtonType.YES, ButtonType.NO, ButtonType.CANCEL);
+            alert.showAndWait();
 
+            String delBookings = "DELETE FROM roombookingsystem.bookings WHERE ROOM_ID = ?";
+            String delRoom = "DELETE FROM roombookingsystem.rooms WHERE ROOM_ID = ?";
+            if (alert.getResult() == ButtonType.YES) {      // check users choice on the alert
+                try {
+                    PreparedStatement ps = conn.prepareStatement(delBookings);
+                    ps.setInt(1, room_id);
+                    ps.execute();       // remove bookings with room id
+                    ps.clearParameters();
 
-        cbbType.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                String val = cbbType.getValue().toString();
-                if (val.equals("Lecture Theatre")) {
-                    cbbSize.setItems(lectureSizes);
-                } else if (val.equals("Computer lab")) {
-                    cbbSize.setItems(pcLabSizes);
-                } else if (val.equals("Seminar room")) {
-                    cbbSize.setItems(seminarSizes);
-                } else if (val.equals("Meeting space")) {
-                    cbbSize.setItems(meetingSizes);
-                } else {
-                    cbbSize.setItems(null);
+                    ps = conn.prepareStatement(delRoom);
+                    ps.setInt(1, room_id);  // remove the room from db.
+                    ps.execute();
+                    ps.close();
+
+                    output.writeUTF("RefreshTable");
+                    output.flush();
+                    callPopup(room + " has been deleted.", "Room deleted");
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         });
 
+        cbbType.setOnAction((ActionEvent event) -> {
+            String val = cbbType.getValue().toString();
+            if (val.equals("Lecture Theatre")) {
+                cbbSize.setItems(lectureSizes);
+            } else if (val.equals("Computer lab")) {
+                cbbSize.setItems(pcLabSizes);
+            } else if (val.equals("Seminar room")) {
+                cbbSize.setItems(seminarSizes);
+            } else if (val.equals("Meeting space")) {
+                cbbSize.setItems(meetingSizes);
+            } else {
+                cbbSize.setItems(null);
+            }
+        });
 
         btnBook.setOnAction((ActionEvent event) -> {
             String bookingFor = txtName1.getText();
@@ -302,7 +322,6 @@ public class ManagerController extends Thread implements Initializable {
 
             int days = 0;
             int weeks = 0;
-
 
             try {
                 days = (int) cbDays.getValue();
@@ -447,8 +466,8 @@ public class ManagerController extends Thread implements Initializable {
         paneNewRoom.setVisible(false);
         txtName1.setText("");
         txtNotes.setText("");
-
-
+        room_id = 0;
+        avail_id = 0;
         txtName1.setDisable(true);
         txtNotes.setDisable(true);
         chkAM.setDisable(true);
@@ -456,11 +475,11 @@ public class ManagerController extends Thread implements Initializable {
         cbDays.setDisable(true);
         cbWeeks.setDisable(true);
         btnBook.setDisable(true);
+        btnRemoveRoom.setDisable(true);
+
         cbDays.setValue(0);
         cbWeeks.setValue(0);
     }
-
-
 
     static void callPopup(String message, String title) {
         LoginController.popup(message, title);
