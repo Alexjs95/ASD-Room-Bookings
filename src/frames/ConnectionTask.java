@@ -4,6 +4,7 @@ import utils.Server;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.EOFException;
 import java.net.Socket;
 
 public class ConnectionTask implements Runnable {
@@ -28,7 +29,10 @@ public class ConnectionTask implements Runnable {
                 String msg = input.readUTF();       // get message from client
                 server.msgToAll(msg);     // send message using server msgToAll method
             }
-        } catch (Exception ex) {
+        } catch (EOFException e) {
+            System.out.println("Connection closed");
+        }
+        catch (Exception ex) {
             ex.printStackTrace();
         } finally {
             try {

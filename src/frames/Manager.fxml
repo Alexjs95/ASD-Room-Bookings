@@ -49,7 +49,7 @@
             <Font size="13.0" />
          </font>
       </Label>
-      <Label fx:id="lblRoom" layoutX="29.0" layoutY="406.0" prefHeight="17.0" prefWidth="89.0" text="Selected room: " />
+      <Label fx:id="lblRoom" layoutX="29.0" layoutY="406.0" prefHeight="17.0" prefWidth="273.0" text="Selected room: " />
       <Label layoutX="29.0" layoutY="452.0" prefHeight="17.0" prefWidth="89.0" text="Booking for:" />
       <Label layoutX="29.0" layoutY="488.0" text="Select Period" />
       <Label layoutX="29.0" layoutY="521.0" text="Reason for unavailability" />
@@ -82,5 +82,6 @@
       <Label layoutX="777.0" layoutY="100.0" text="Date:" />
       <Label layoutX="776.0" layoutY="140.0" text="Type:" />
       <Button fx:id="btnResetFilter" layoutX="776.0" layoutY="183.0" mnemonicParsing="false" text="Reset Filter" />
+      <Button fx:id="btnLogout" layoutX="947.0" layoutY="29.0" mnemonicParsing="false" text="Logout" />
    </children>
 </AnchorPane>

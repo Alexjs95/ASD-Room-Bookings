@@ -1,16 +1,15 @@
 package frames;
 
-import com.mysql.cj.result.Row;
 import dbtools.Employee;
 import dbtools.Holiday;
 import dbtools.Room;
 import dbtools.Rows;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
@@ -30,7 +29,6 @@ import java.sql.ResultSet;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
-import java.util.function.Predicate;
 
 public class ManagerController extends Thread implements Initializable {
     @FXML
@@ -67,6 +65,8 @@ public class ManagerController extends Thread implements Initializable {
     @FXML Button btnRemoveRoom;
     @FXML Button btnAddHols;
     @FXML Button btnResetFilter;
+    @FXML Button btnLogout;
+
 
     Employee currUser;
     int empID;
@@ -209,9 +209,12 @@ public class ManagerController extends Thread implements Initializable {
             SortedList<Rows> sortedList = new SortedList<>(filteredList);   // wrap filtered list into sorted list
             sortedList.comparatorProperty().bind(tableView.comparatorProperty());
             tableView.setItems(sortedList);
+            resetForm();
         }));
 
         btnResetFilter.setOnAction((ActionEvent -> {
+            dpDateFilter.getEditor().clear();
+            cbTypeFilter.getSelectionModel().clearSelection();
             tableView.setItems(data);
         }));
 
@@ -229,6 +232,8 @@ public class ManagerController extends Thread implements Initializable {
             SortedList<Rows> sortedList = new SortedList<>(filteredList);
             sortedList.comparatorProperty().bind(tableView.comparatorProperty());
             tableView.setItems(sortedList);
+            resetForm();
+            resetForm();
 
         }));
 
@@ -237,7 +242,11 @@ public class ManagerController extends Thread implements Initializable {
         btnAddRoom.setOnAction((ActionEvent event) -> {
             String name = txtName.getText();
             String type = cbbType.getValue();
-            int size = cbbSize.getValue();
+            int size = 0;
+            try {
+                size = cbbSize.getValue();
+            } catch (Exception e) { }
+
 
             if (name.equals("") || type.equals("") || size == 0) {
                 callPopup("To add new room you must enter the name, select the type of room and the size", "New room error");
@@ -446,6 +455,15 @@ public class ManagerController extends Thread implements Initializable {
                 }
             }
         });
+
+        btnLogout.setOnAction((ActionEvent -> {
+            try {
+                output.close();
+                Platform.exit();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }));
     }
 
     void setUser(Employee employee, int id) {
@@ -476,7 +494,8 @@ public class ManagerController extends Thread implements Initializable {
         cbWeeks.setDisable(true);
         btnBook.setDisable(true);
         btnRemoveRoom.setDisable(true);
-
+        chkPM.setSelected(false);
+        chkAM.setSelected(false);
         cbDays.setValue(0);
         cbWeeks.setValue(0);
     }

@@ -3,12 +3,12 @@ package frames;
 import dbtools.Bookings;
 import dbtools.Employee;
 import dbtools.Rows;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
@@ -18,7 +18,6 @@ import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import utils.ConnectionUtil;
 
-import javax.swing.*;
 import java.io.DataOutputStream;
 import java.net.Socket;
 import java.net.URL;
@@ -29,8 +28,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.function.Predicate;
-import java.util.logging.Filter;
 
 public class BookingController extends Thread implements Initializable    {
     @FXML public TableView<Rows> tableView = new TableView<Rows>();
@@ -57,12 +54,15 @@ public class BookingController extends Thread implements Initializable    {
     @FXML TextField txtName;
     @FXML TextField txtNotes;
     @FXML TextField txtContact;
+
     @FXML CheckBox chkAM;
     @FXML CheckBox chkPM;
-    @FXML Button btnBook;
     @FXML DatePicker dpDateFilter;
-    @FXML Button btnResetFilter;
     @FXML ComboBox<String> cbTypeFilter;
+
+    @FXML Button btnBook;
+    @FXML Button btnResetFilter;
+    @FXML Button btnLogout;
 
     private ObservableList<Rows> data;
     private ObservableList<Bookings> bookings;
@@ -133,12 +133,12 @@ public class BookingController extends Thread implements Initializable    {
         // Row click event
         tableView.setOnMouseClicked((MouseEvent event) -> {
             if (tableView.getSelectionModel().getSelectedItem() != null) {
-                resetForm();
                 selectedItem = tableView.getSelectionModel().getSelectedItem();
                 String date = selectedItem.getDate();
                 String room = selectedItem.getRoomname();
                 lblDate.setText(date);
                 lblRoom.setText(room);
+                btnBook.setDisable(false);
 
                 //disable check boxes if the value is false in the row.
                 if (!selectedItem.isAm()) {
@@ -200,15 +200,18 @@ public class BookingController extends Thread implements Initializable    {
             SortedList<Rows> sortedList = new SortedList<>(filteredList);   // wrap filtered list into sorted list
             sortedList.comparatorProperty().bind(tableView.comparatorProperty());
             tableView.setItems(sortedList);
-
+            resetForm();
         }));
 
         btnResetFilter.setOnAction((ActionEvent -> {
+            dpDateFilter.getEditor().clear();
+            cbTypeFilter.getSelectionModel().clearSelection();
             tableView.setItems(data);
         }));
 
         cbTypeFilter.setOnAction((ActionEvent -> {
             String type = cbTypeFilter.getValue();
+
             FilteredList<Rows> filteredList = new FilteredList<>(data, p-> true);
             filteredList.setPredicate(rows -> {
                 if (rows.getType().equals(type)) { // compare type of room in table to selected type.
@@ -220,6 +223,7 @@ public class BookingController extends Thread implements Initializable    {
             SortedList<Rows> sortedList = new SortedList<>(filteredList);
             sortedList.comparatorProperty().bind(tableView.comparatorProperty());
             tableView.setItems(sortedList);
+            resetForm();
         }));
 
         btnBook.setOnAction((ActionEvent event) -> {
@@ -229,8 +233,7 @@ public class BookingController extends Thread implements Initializable    {
             Boolean am = chkAM.isSelected();
             Boolean pm = chkPM.isSelected();
 
-
-            if (bookingFor.isEmpty() || contact.isEmpty() || !am && !pm) {
+           if (bookingFor.isEmpty() || contact.isEmpty() || !am && !pm) {
                 callPopup("You must enter who the booking is for, select whether it will be AM or PM or both and " +
                         " enter contact details.", "Missing details");
             } else {
@@ -285,17 +288,21 @@ public class BookingController extends Thread implements Initializable    {
             }
         });
 
-//        data.addListener((ListChangeListener<Rows>) change -> {
-//            while (change.next()) {
-//                tableView.setItems(data);
-//            }
-//        });
+        btnLogout.setOnAction((ActionEvent -> {
+            try {
+                output.close();
+                Platform.exit();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }));
     }
 
     void setUser(Employee employee, int id) {
         lblUser.setText(employee.getUsername());
         empID = id;
     }
+
 
     void resetForm() {
         lblRoom.setText("");
@@ -311,7 +318,10 @@ public class BookingController extends Thread implements Initializable    {
         txtName.setDisable(false);
         txtNotes.setDisable(false);
         tableBookings.setItems(null);
+        btnBook.setDisable(true);
     }
+
+
 
     public void setTableView(ObservableList list) {
         data = list;
@@ -343,6 +353,8 @@ public class BookingController extends Thread implements Initializable    {
         }
         bookings = FXCollections.observableList(list);
     }
+
+
 
     static void callPopup(String message, String title) {
         LoginController.popup(message, title);

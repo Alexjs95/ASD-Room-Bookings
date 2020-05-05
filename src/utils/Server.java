@@ -23,6 +23,7 @@ public class Server {
                     Socket socket = ss.accept();
                     ConnectionTask connection = new ConnectionTask(socket, this);   // Create new connection
                     lstConnections.add(connection);
+                    System.out.println("Connection made to: " + connection);
                     Thread thread = new Thread(connection); // Create a new thread of that connection.
                     thread.start();
                 }
